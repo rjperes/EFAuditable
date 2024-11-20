@@ -25,6 +25,8 @@ namespace EFAuditable.Console
 
             using var scope = serviceProvider.CreateScope();
             using var ctx = scope.ServiceProvider.GetRequiredService<TestDbContext>();
+
+            ctx.Tests.ToList();
         }
     }
 }

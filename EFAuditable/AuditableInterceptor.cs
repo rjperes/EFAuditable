@@ -14,13 +14,13 @@ namespace EFAuditable
             {
                 if (entity.State == EntityState.Added)
                 {
-                    entity.Property<string>(nameof(IAuditable.CreatedBy)).CurrentValue = identity;
+                    entity.Property<string?>(nameof(IAuditable.CreatedBy)).CurrentValue = identity;
                     entity.Property<DateTimeOffset?>(nameof(IAuditable.CreatedAt)).CurrentValue = time;
                 }
 
                 if (entity.State == EntityState.Modified)
                 {
-                    entity.Property<string>(nameof(IAuditable.UpdatedBy)).CurrentValue = identity;
+                    entity.Property<string?>(nameof(IAuditable.UpdatedBy)).CurrentValue = identity;
                     entity.Property<DateTimeOffset?>(nameof(IAuditable.UpdatedAt)).CurrentValue = time;
                 }
             }

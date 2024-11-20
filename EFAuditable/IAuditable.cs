@@ -1,10 +1,10 @@
 ﻿namespace EFAuditable
 {
-    internal interface IAuditable
+    public interface IAuditable
     {
-        string CreatedBy { get; }
+        string? CreatedBy { get; }
         DateTimeOffset? CreatedAt { get; }
-        string UpdatedBy { get; }
+        string? UpdatedBy { get; }
         DateTimeOffset? UpdatedAt { get; }
     }
 }

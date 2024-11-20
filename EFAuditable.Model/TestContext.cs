@@ -12,6 +12,10 @@ namespace EFAuditable.Web
             _timeProvider = timeProvider;
             _identityProvider = identityProvider;
         }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -24,5 +28,7 @@ namespace EFAuditable.Web
             configurationBuilder.AddAudit();
             base.ConfigureConventions(configurationBuilder);
         }
+
+        public DbSet<Test> Tests { get; private set; }
     }
 }
