@@ -1,0 +1,14 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/EFAuditable/bin
+/EFAuditable/obj
+/EFAuditable.Console/bin
+/EFAuditable.Console/obj
+/EFAuditable.Model/bin
+/EFAuditable.Model/obj
+/EFAuditable.Web/bin
+/EFAuditable.Web/obj
+/EFAuditable.Web/EFAuditable.Web.csproj.user
