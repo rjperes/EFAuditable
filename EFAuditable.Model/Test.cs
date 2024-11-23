@@ -1,5 +1,5 @@
 ﻿
-namespace EFAuditable.Web
+namespace EFAuditable.Model
 {
     public class Test : IAuditable
     {

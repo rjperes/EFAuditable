@@ -1,75 +1,104 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Security.Principal;
 
 namespace EFAuditable
 {
-    internal class AuditableInterceptor(AuditableOptions Options, IIdentityProvider IdentityProvider, TimeProvider TimeProvider) : SaveChangesInterceptor
+    internal class AuditableInterceptor(AuditableOptions Options, IIdentityProvider IdentityProvider, TimeProvider TimeProvider, IAuditableSerializer Serializer) : SaveChangesInterceptor
     {
-        private readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
-        {
-            IgnoreReadOnlyFields = true,
-            IgnoreReadOnlyProperties = true,
-            MaxDepth = 1,
-            IncludeFields = true,
-            ReferenceHandler = ReferenceHandler.IgnoreCycles
-        };
-
-        private void SetModifiedProperties(EntityEntry<IAuditable> entry, DateTimeOffset time, string identity)
+        private void SetModifiedProperties(EntityEntry entry, DateTimeOffset time, string identity)
         {
             var entity = entry.Entity;
 
             if (entry.State == EntityState.Added)
             {
-                entry.Property<string?>(nameof(IAuditable.CreatedBy)).CurrentValue = identity;
-                entry.Property<DateTimeOffset?>(nameof(IAuditable.CreatedAt)).CurrentValue = time;
+                entry.CurrentValues[nameof(IAuditable.CreatedBy)] = identity;
+                entry.CurrentValues[nameof(IAuditable.CreatedAt)] = time;
             }
         }
 
-        private void SetAddedProperties(EntityEntry<IAuditable> entry, DateTimeOffset time, string identity)
+        private void SetAddedProperties(EntityEntry entry, DateTimeOffset time, string identity)
         {
             var entity = entry.Entity;
 
             if (entry.State == EntityState.Modified)
             {
-                entry.Property<string?>(nameof(IAuditable.UpdatedBy)).CurrentValue = identity;
-                entry.Property<DateTimeOffset?>(nameof(IAuditable.UpdatedAt)).CurrentValue = time;
+                entry.CurrentValues[nameof(IAuditable.UpdatedBy)] = identity;
+                entry.CurrentValues[nameof(IAuditable.UpdatedAt)] = time;
             }
         }
 
-        public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+        protected IEnumerable<EntityEntry> DoSaveChanges(DbContext context)
         {
             var time = TimeProvider.GetUtcNow();
             var identity = IdentityProvider.GetCurrentUser();
 
-            foreach (var entry in eventData.Context!.ChangeTracker.Entries<IAuditable>().Where(x => x.State == EntityState.Added || x.State == EntityState.Modified))
+            var entries = context.ChangeTracker.Entries().Where(x => x.IsAudit()).Where(x => x.State == EntityState.Added || x.State == EntityState.Modified).ToList();
+            var newEntries = entries.Where(x => x.State == EntityState.Added);
+
+            foreach (var entry in entries)
             {
-                if (Options.StoreOldValues)
+                if (Options.History)
                 {
                     var key = entry.Metadata.FindPrimaryKey();
-                    var props = key?.Properties?.ToDictionary(x => x.Name, x => entry.Property(x.Name).CurrentValue);
-                    CopyOldProperties(eventData.Context, entry, time, identity, props ?? new());
+                    var props = key?.Properties?.ToDictionary(x => x.Name, x => entry.Property(x.Name).OriginalValue);
+                    CopyOldProperties(context, entry, time, identity, props ?? new());
                 }
 
                 SetModifiedProperties(entry, time, identity);
                 SetAddedProperties(entry, time, identity);
             }
 
-            return await base.SavingChangesAsync(eventData, result, cancellationToken);
+            return newEntries;
         }
 
-        private void CopyOldProperties(DbContext ctx, EntityEntry<IAuditable> entry, DateTimeOffset time, string identity, Dictionary<string, object?> key)
+        private void DoSaveHistory(DbContext context, IEnumerable<EntityEntry> newEntries)
         {
-            if (Options.StoreOldValues)
+            var time = TimeProvider.GetUtcNow();
+            var identity = IdentityProvider.GetCurrentUser();
+
+            foreach (var entry in newEntries)
             {
+                if (Options.History)
+                {
+                    var key = entry.Metadata.FindPrimaryKey();
+                    var props = key?.Properties?.ToDictionary(x => x.Name, x => entry.Property(x.Name).OriginalValue);
+                    CopyOldProperties(context, entry, time, identity, props ?? new());
+                }
+            }
+        }
+
+        public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
+        {
+            var newEntries = DoSaveChanges(eventData.Context!);
+            var res = base.SavingChanges(eventData, result);
+            DoSaveHistory(eventData.Context!, newEntries);
+            base.SavingChanges(eventData, result);
+            return res;
+        }
+
+        public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+        {
+            var newEntries = DoSaveChanges(eventData.Context!);
+            var res = await base.SavingChangesAsync(eventData, result, cancellationToken);
+            DoSaveHistory(eventData.Context!, newEntries);
+            await base.SavingChangesAsync(eventData, result, cancellationToken);
+            return res;
+        }
+
+        private void CopyOldProperties(DbContext ctx, EntityEntry entry, DateTimeOffset time, string identity, Dictionary<string, object?> key)
+        {
+            if (Options.History)
+            {
+                var keys = Serializer.Serialize(key);
+                var values = Serializer.Serialize(entry.Entity);
+
                 var history = new AuditableHistory
                 {
-                    Id = Guid.NewGuid(),
-                    Key = (key.Count == 1) ? key.First().Value!.ToString()! : JsonSerializer.Serialize(key, _serializerOptions),
+                    Key = keys,
                     Entity = entry.Metadata.Name,
-                    Values = JsonSerializer.Serialize(entry.Entity, _serializerOptions),
+                    Values = values,
                     Timestamp = time,
                     User = identity
                 };

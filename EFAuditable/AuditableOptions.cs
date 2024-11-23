@@ -2,7 +2,7 @@
 {
     public class AuditableOptions
     {
-        public bool StoreOldValues { get; set; } = false;
-        public string? OldValuesTableName { get; set; } = nameof(AuditableHistory);
+        public bool History { get; set; } = false;
+        public string? HistoryTableName { get; set; } = nameof(AuditableHistory);
     }
 }

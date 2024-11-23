@@ -3,15 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EFAuditable
 {
-    public class AuditableExtension : IDbContextOptionsExtension
+    public class AuditableExtension(AuditableOptions Options) : IDbContextOptionsExtension
     {
-        public DbContextOptionsExtensionInfo Info
-        {
-            get
-            {
-                return null;
-            }
-        }
+        public DbContextOptionsExtensionInfo Info => null;
 
         public void ApplyServices(IServiceCollection services)
         {

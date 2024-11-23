@@ -1,3 +1,4 @@
+using EFAuditable.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace EFAuditable.Web

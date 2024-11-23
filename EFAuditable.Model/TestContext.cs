@@ -1,7 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
-namespace EFAuditable.Web
+namespace EFAuditable.Model
 {
+    public class TestDbContextFactory : IDesignTimeDbContextFactory<TestDbContext>
+    {
+        public TestDbContext CreateDbContext(string[] args)
+        {
+            var options = new DbContextOptionsBuilder()
+                .UseSqlServer("Server=.; Database=Test; Integrated Security=SSPI; TrustServerCertificate=true;")
+                .Options;
+            return new TestDbContext(options);
+        }
+    }
+
     public class TestDbContext : DbContext
     {
         public TestDbContext(DbContextOptions options) : base(options)
@@ -9,19 +21,25 @@ namespace EFAuditable.Web
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.AddAudit();
+            optionsBuilder.AddAudit(static options =>
+            {
+                options.History = true;
+            });
             base.OnConfiguring(optionsBuilder);
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
-            configurationBuilder.AddAudit();
+            configurationBuilder.AddAudit(static options =>
+            {
+                options.History = true;
+            });
             base.ConfigureConventions(configurationBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Test>().Audit(audit: true, history: true);
+            modelBuilder.Entity<Test>().Audit();
             base.OnModelCreating(modelBuilder);
         }
 
