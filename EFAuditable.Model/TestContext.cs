@@ -1,25 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace EFAuditable.Web
 {
     public class TestDbContext : DbContext
     {
-        private readonly TimeProvider _timeProvider;
-        private readonly IIdentityProvider _identityProvider;
-
-        public TestDbContext(DbContextOptions options, TimeProvider timeProvider, IIdentityProvider identityProvider) : base(options)
-        {
-            _timeProvider = timeProvider;
-            _identityProvider = identityProvider;
+        public TestDbContext(DbContextOptions options) : base(options)
+        {           
         }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.AddAudit(_identityProvider, _timeProvider);
+            optionsBuilder.Options.WithExtension(new AuditableExtension());
+            optionsBuilder.AddAudit();
             base.OnConfiguring(optionsBuilder);
         }
 
@@ -27,6 +21,12 @@ namespace EFAuditable.Web
         {
             configurationBuilder.AddAudit();
             base.ConfigureConventions(configurationBuilder);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Test>().Audit(audit: true, history: true);
+            base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Test> Tests { get; private set; }
