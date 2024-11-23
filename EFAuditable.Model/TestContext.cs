@@ -1,7 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace EFAuditable.Web
 {
@@ -12,7 +9,6 @@ namespace EFAuditable.Web
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.Options.WithExtension(new AuditableExtension());
             optionsBuilder.AddAudit();
             base.OnConfiguring(optionsBuilder);
         }
