@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Security.Principal;
 
 namespace EFAuditable.Console
@@ -17,13 +18,20 @@ namespace EFAuditable.Console
                 .Build();
 
             var services = new ServiceCollection();
+            services.AddLogging(static options =>
+            {
+                options.AddConsole();
+            });
             services.AddAuditableTimeProvider();
             services.AddAuditableIdentityProvider();
             services.AddAuditable(history: true);
             services.AddDbContext<TestDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("Default"));
-                options.AddAudit();
+                options.AddAudit(static options =>
+                {
+                    options.History = true;
+                });
             });
 
             var serviceProvider = services.BuildServiceProvider(true);
@@ -31,10 +39,7 @@ namespace EFAuditable.Console
             using var scope = serviceProvider.CreateScope();
             using var ctx = scope.ServiceProvider.GetRequiredService<TestDbContext>();
 
-            Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity("rjperes"), Array.Empty<string>());
-
-            var cs = ctx.GetInfrastructure().GetService<IDbContextServices>();
-            var cd = ctx.GetInfrastructure().GetService<IDbContextDependencies>();
+            Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity("rjperes"), []);
 
             var tests = ctx.Tests.ToList();
 

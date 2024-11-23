@@ -31,6 +31,7 @@ namespace EFAuditable
                     CheckProperty(entityBuilder, nameof(AuditableHistory.Values), typeof(string));
                     CheckProperty(entityBuilder, nameof(AuditableHistory.Timestamp), typeof(DateTimeOffset));
                     CheckProperty(entityBuilder, nameof(AuditableHistory.User), typeof(string));
+                    CheckProperty(entityBuilder, nameof(AuditableHistory.State), typeof(string));
                 }
             }
 

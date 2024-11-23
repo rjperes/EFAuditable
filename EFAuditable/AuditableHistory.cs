@@ -8,5 +8,7 @@
         public required string Values { get; set; }
         public DateTimeOffset Timestamp { get; set; }
         public required string User { get; set; }
+
+        public required string State { get; set; }
     }
 }

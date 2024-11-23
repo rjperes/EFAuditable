@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.IdentityModel.Tokens.Jwt;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -28,13 +29,15 @@ namespace EFAuditable
             timeProvider = GetService(optionsBuilder, timeProvider, TimeProvider.System);
             serializer = GetService(optionsBuilder, serializer, new JsonAuditableSerializer());
 
-            return optionsBuilder.AddInterceptors(new AuditableInterceptor(opt, identityProvider, timeProvider, serializer));
+            var logger = GetService<ILogger<AuditableInterceptor>>(optionsBuilder, null);
+
+            return optionsBuilder.AddInterceptors(new AuditableInterceptor(opt, identityProvider, timeProvider, serializer, logger));
         }
         
         private static T GetService<T>(DbContextOptionsBuilder optionsBuilder, T? service, T? defaultValue = default) where T : class
         {
             var ext = optionsBuilder.Options.FindExtension<CoreOptionsExtension>();
-            service = service ?? ext!.ApplicationServiceProvider!.GetRequiredService<T>() ?? defaultValue;
+            service = service ?? ext!.ApplicationServiceProvider!.GetService<T>() ?? defaultValue;
             return service!;
         }
     }

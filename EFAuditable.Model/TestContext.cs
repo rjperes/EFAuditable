@@ -17,14 +17,11 @@ namespace EFAuditable.Model
     public class TestDbContext : DbContext
     {
         public TestDbContext(DbContextOptions options) : base(options)
-        {           
+        {
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.AddAudit(static options =>
-            {
-                options.History = true;
-            });
             base.OnConfiguring(optionsBuilder);
         }
 
@@ -39,7 +36,7 @@ namespace EFAuditable.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Test>().Audit();
+            //modelBuilder.Entity<Test>().Audit().IgnoreProperty(x => x.Name);
             base.OnModelCreating(modelBuilder);
         }
 
