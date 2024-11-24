@@ -7,6 +7,15 @@ using System.Security.Principal;
 
 namespace EFAuditable.Console
 {
+    class Base
+    {
+
+    }
+
+    class Derived : Base
+    {
+
+    }
     internal class Program
     {
         static void Main()

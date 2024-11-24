@@ -11,24 +11,15 @@ namespace EFAuditable
         {
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
             ArgumentNullException.ThrowIfNull(property, nameof(property));
-
-            if (property.Body is MemberExpression member)
+            
+            if (!(property.Body is MemberExpression member) || !member.Member.DeclaringType!.IsAssignableFrom(typeof(T)))
             {
-                builder.Property(member.Member.Name).Metadata.AddAnnotation(AuditableAnnotations.IgnoreProperty, true);
+                throw new ArgumentException("Invalid member expression.", nameof(property));
             }
 
+            builder.Property(member.Member.Name).Metadata.AddAnnotation(AuditableAnnotations.IgnoreProperty, true);
+
             return builder;
-        }
-
-        public static EntityTypeBuilder<T> Audit<T>(this EntityTypeBuilder<T> builder, Action<AuditableOptions> options) where T : class
-        {
-            ArgumentNullException.ThrowIfNull(builder, nameof(builder));
-            ArgumentNullException.ThrowIfNull(options, nameof(options));
-
-            var opt = new AuditableOptions();
-            options(opt);
-
-            return Audit(builder, true, opt.History);
         }
 
         public static EntityTypeBuilder<T> Audit<T>(this EntityTypeBuilder<T> builder, bool audit = true, bool history = false) where T : class
@@ -39,11 +30,10 @@ namespace EFAuditable
             return builder;
         }
 
-        public static bool IsAudit(this EntityEntry entry)
+        internal static bool IsAudit(this EntityEntry entry)
         {
             ArgumentNullException.ThrowIfNull(entry, nameof(entry));
-            var annotation = entry.Metadata.FindAnnotation(AuditableAnnotations.Audit);
-            var audit = annotation?.Value;
+            var audit = entry.Metadata.FindAnnotation(AuditableAnnotations.Audit)?.Value;
 
             if (audit is bool)
             {
@@ -53,11 +43,10 @@ namespace EFAuditable
             return typeof(IAuditable).IsAssignableFrom(entry.Metadata.ClrType);
         }
 
-        public static bool IsAudit(this IReadOnlyTypeBase entry)
+        internal static bool IsAudit(this IReadOnlyTypeBase entry)
         {
             ArgumentNullException.ThrowIfNull(entry, nameof(entry));
-            var annotation = entry.FindAnnotation(AuditableAnnotations.Audit);
-            var audit = annotation?.Value;
+            var audit = entry.FindAnnotation(AuditableAnnotations.Audit)?.Value;
 
             if (audit is bool)
             {
@@ -65,20 +54,6 @@ namespace EFAuditable
             }
 
             return typeof(IAuditable).IsAssignableFrom(entry.ClrType);
-        }
-
-        public static bool IsHistory(this IReadOnlyTypeBase entry)
-        {
-            ArgumentNullException.ThrowIfNull(entry, nameof(entry));
-            var annotation = entry.FindAnnotation(AuditableAnnotations.History);
-            var history = annotation?.Value;
-
-            if (history is bool)
-            {
-                return history.Equals(true);
-            }
-
-            return false;
         }
     }
 }

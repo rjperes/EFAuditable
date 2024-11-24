@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Title>EFAuditable</Title>
+    <Title>An audit trail library for .NET</Title>
     <Authors>Ricardo Peres</Authors>
   </PropertyGroup>
 
