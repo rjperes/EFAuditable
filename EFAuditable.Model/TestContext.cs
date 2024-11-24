@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace EFAuditable.Model
 {
+    [DbContext(typeof(TestDbContext))]
     public class TestDbContextFactory : IDesignTimeDbContextFactory<TestDbContext>
     {
         public TestDbContext CreateDbContext(string[] args)
@@ -36,7 +38,7 @@ namespace EFAuditable.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Test>().Audit().Ignore(x => x.Name);
+            modelBuilder.Entity<Test>().Audit().IgnoreAuditFor(x => x.Name);
             base.OnModelCreating(modelBuilder);
         }
 

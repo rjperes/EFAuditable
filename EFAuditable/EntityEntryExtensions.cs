@@ -7,7 +7,7 @@ namespace EFAuditable
 {
     public static class EntityEntryExtensions
     {
-        public static EntityTypeBuilder<T> Ignore<T>(this EntityTypeBuilder<T> builder, Expression<Func<T, object>> property) where T : class
+        public static EntityTypeBuilder<T> IgnoreAuditFor<T>(this EntityTypeBuilder<T> builder, Expression<Func<T, object>> property) where T : class
         {
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
             ArgumentNullException.ThrowIfNull(property, nameof(property));
