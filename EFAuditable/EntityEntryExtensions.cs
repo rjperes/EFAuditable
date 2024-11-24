@@ -7,22 +7,20 @@ namespace EFAuditable
 {
     public static class EntityEntryExtensions
     {
-        public class AuditEntityTypeBuilder<T>(EntityTypeBuilder<T> builder) where T : class
+        public static EntityTypeBuilder<T> Ignore<T>(this EntityTypeBuilder<T> builder, Expression<Func<T, object>> property) where T : class
         {
-            public AuditEntityTypeBuilder<T> IgnoreProperty<TMember>(Expression<Func<T, TMember>> property)
+            ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+            ArgumentNullException.ThrowIfNull(property, nameof(property));
+
+            if (property.Body is MemberExpression member)
             {
-                ArgumentNullException.ThrowIfNull(property, nameof(property));
-
-                if (property.Body is MemberExpression member)
-                {
-                    builder.Property(member.Member.Name).Metadata.AddAnnotation(AuditableAnnotations.IgnoreProperty, true);
-                }
-
-                return this;
+                builder.Property(member.Member.Name).Metadata.AddAnnotation(AuditableAnnotations.IgnoreProperty, true);
             }
+
+            return builder;
         }
 
-        public static AuditEntityTypeBuilder<T> Audit<T>(this EntityTypeBuilder<T> builder, Action<AuditableOptions> options) where T : class
+        public static EntityTypeBuilder<T> Audit<T>(this EntityTypeBuilder<T> builder, Action<AuditableOptions> options) where T : class
         {
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
             ArgumentNullException.ThrowIfNull(options, nameof(options));
@@ -33,12 +31,12 @@ namespace EFAuditable
             return Audit(builder, true, opt.History);
         }
 
-        public static AuditEntityTypeBuilder<T> Audit<T>(this EntityTypeBuilder<T> builder, bool audit = true, bool history = false) where T : class
+        public static EntityTypeBuilder<T> Audit<T>(this EntityTypeBuilder<T> builder, bool audit = true, bool history = false) where T : class
         {
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
             builder.Metadata.SetAnnotation(AuditableAnnotations.Audit, audit);
             builder.Metadata.SetAnnotation(AuditableAnnotations.History, history);
-            return new(builder);
+            return builder;
         }
 
         public static bool IsAudit(this EntityEntry entry)

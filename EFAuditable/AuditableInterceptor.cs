@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace EFAuditable
 {
@@ -42,7 +41,7 @@ namespace EFAuditable
             var entries = context.ChangeTracker.Entries().Where(x => x.IsAudit()).Where(x => x.State == EntityState.Added || x.State == EntityState.Modified).ToList();
 
             foreach (var entry in entries)
-            {                
+            {
                 SetModifiedProperties(entry, time, identity);
                 SetAddedProperties(entry, time, identity);
             }
@@ -89,7 +88,7 @@ namespace EFAuditable
                 var ignoreProperties = entry.Properties
                     .Where(x => object.Equals(x.Metadata.FindAnnotation(AuditableAnnotations.IgnoreProperty)?.Value, true))
                     .Select(x => x.Metadata.Name)
-                    .Concat([ nameof(IAuditable.UpdatedAt), nameof(IAuditable.UpdatedBy), nameof(IAuditable.CreatedAt), nameof(IAuditable.CreatedBy) ])
+                    .Concat([nameof(IAuditable.UpdatedAt), nameof(IAuditable.UpdatedBy), nameof(IAuditable.CreatedAt), nameof(IAuditable.CreatedBy)])
                     .ToArray();
                 var keys = Serializer.Serialize(key);
                 var values = Serializer.Serialize(entry.Entity, ignoreProperties);

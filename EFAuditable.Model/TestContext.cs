@@ -36,7 +36,7 @@ namespace EFAuditable.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<Test>().Audit().IgnoreProperty(x => x.Name);
+            modelBuilder.Entity<Test>().Audit().Ignore(x => x.Name);
             base.OnModelCreating(modelBuilder);
         }
 

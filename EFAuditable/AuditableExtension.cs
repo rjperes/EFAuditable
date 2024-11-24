@@ -9,12 +9,12 @@ namespace EFAuditable
 
         public void ApplyServices(IServiceCollection services)
         {
-            
+
         }
 
         public void Validate(IDbContextOptions options)
         {
-            
+
         }
     }
 }

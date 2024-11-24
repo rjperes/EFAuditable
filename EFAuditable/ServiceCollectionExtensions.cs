@@ -76,7 +76,7 @@ namespace EFAuditable
         {
             ArgumentNullException.ThrowIfNull(services, nameof(services));
 
-            return services.AddSingleton<IIdentityProvider, TService>();            
+            return services.AddSingleton<IIdentityProvider, TService>();
         }
 
         public static IServiceCollection AddAuditableTimeProvider(this IServiceCollection services)

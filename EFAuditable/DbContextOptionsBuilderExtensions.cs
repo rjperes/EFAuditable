@@ -2,8 +2,6 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.IdentityModel.Tokens.Jwt;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace EFAuditable
 {
@@ -33,7 +31,7 @@ namespace EFAuditable
 
             return optionsBuilder.AddInterceptors(new AuditableInterceptor(opt, identityProvider, timeProvider, serializer, logger));
         }
-        
+
         private static T GetService<T>(DbContextOptionsBuilder optionsBuilder, T? service, T? defaultValue = default) where T : class
         {
             var ext = optionsBuilder.Options.FindExtension<CoreOptionsExtension>();
