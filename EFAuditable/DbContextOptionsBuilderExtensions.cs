@@ -20,9 +20,6 @@ namespace EFAuditable
             var opt = new AuditableOptions();
             options.Invoke(opt);
 
-            optionsBuilder.Options.WithExtension(new AuditableExtension(opt));
-
-            var ext = optionsBuilder.Options.FindExtension<CoreOptionsExtension>();
             identityProvider = GetService(optionsBuilder, identityProvider);
             timeProvider = GetService(optionsBuilder, timeProvider, TimeProvider.System);
             serializer = GetService(optionsBuilder, serializer, new JsonAuditableSerializer());
@@ -35,7 +32,7 @@ namespace EFAuditable
         private static T GetService<T>(DbContextOptionsBuilder optionsBuilder, T? service, T? defaultValue = default) where T : class
         {
             var ext = optionsBuilder.Options.FindExtension<CoreOptionsExtension>();
-            service = service ?? ext!.ApplicationServiceProvider!.GetService<T>() ?? defaultValue;
+            service ??= ext!.ApplicationServiceProvider!.GetService<T>() ?? defaultValue;
             return service!;
         }
     }

@@ -16,12 +16,8 @@ namespace EFAuditable.Model
         }
     }
 
-    public class TestDbContext : DbContext
+    public class TestDbContext(DbContextOptions options) : DbContext(options)
     {
-        public TestDbContext(DbContextOptions options) : base(options)
-        {
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);

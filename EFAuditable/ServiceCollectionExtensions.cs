@@ -24,14 +24,14 @@ namespace EFAuditable
         }
 
 
-        public static IServiceCollection AddAuditable(this IServiceCollection services, bool history, string historyTableName = null)
+        public static IServiceCollection AddAuditable(this IServiceCollection services, bool history, string? historyTableName = null)
         {
             ArgumentNullException.ThrowIfNull(services, nameof(services));
 
             services.AddOptions<AuditableOptions>().Configure(options =>
             {
                 options.History = history;
-                options.HistoryTableName = historyTableName ?? nameof(AuditableHistory);
+                options.HistoryTableName = string.IsNullOrWhiteSpace(historyTableName) ? nameof(AuditableHistory) : historyTableName;
             });
             return services;
         }
@@ -51,7 +51,7 @@ namespace EFAuditable
 
             var asm = Assembly.GetEntryAssembly();
             var isWeb = (asm == null)
-                || (asm.EntryPoint == null) && (Path.GetExtension(asm.Location).Equals(".dll", StringComparison.OrdinalIgnoreCase));
+                || ((asm.EntryPoint == null) && ("Path.GetExtension(asm.Location)".Equals(".dll", StringComparison.OrdinalIgnoreCase)));
 
             if (isWeb)
             {
