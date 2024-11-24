@@ -65,6 +65,8 @@ namespace EFAuditable.Console
             //ctx.Tests.Remove(ctx.Tests.First(x => x.Name == "ABC"));
 
             ctx.SaveChanges();
+
+            var audits = ctx.Audits().ToList();
         }
     }
 }

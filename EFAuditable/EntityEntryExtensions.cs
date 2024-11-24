@@ -32,18 +32,10 @@ namespace EFAuditable
 
         internal static bool IsAudit(this EntityEntry entry)
         {
-            ArgumentNullException.ThrowIfNull(entry, nameof(entry));
-            var audit = entry.Metadata.FindAnnotation(AuditableAnnotations.Audit)?.Value;
-
-            if (audit is bool)
-            {
-                return audit.Equals(true);
-            }
-
-            return typeof(IAuditable).IsAssignableFrom(entry.Metadata.ClrType);
+            return IsAudit(entry.Metadata);
         }
 
-        internal static bool IsAudit(this IReadOnlyTypeBase entry)
+        internal static bool IsAudit(this IReadOnlyEntityType entry)
         {
             ArgumentNullException.ThrowIfNull(entry, nameof(entry));
             var audit = entry.FindAnnotation(AuditableAnnotations.Audit)?.Value;
@@ -53,7 +45,8 @@ namespace EFAuditable
                 return audit.Equals(true);
             }
 
-            return typeof(IAuditable).IsAssignableFrom(entry.ClrType);
+            return typeof(IAuditable).IsAssignableFrom(entry.ClrType)
+                || Attribute.IsDefined(entry.ClrType, typeof(AuditableAttribute));
         }
     }
 }
