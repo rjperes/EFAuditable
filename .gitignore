@@ -12,3 +12,4 @@
 /EFAuditable.Web/bin
 /EFAuditable.Web/obj
 /EFAuditable.Web/EFAuditable.Web.csproj.user
+/publish_nuget.bat

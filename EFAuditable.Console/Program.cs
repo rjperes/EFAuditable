@@ -56,6 +56,8 @@ namespace EFAuditable.Console
 
             ctx.Add(new Test { Name = "ABC" });
 
+            //ctx.Tests.Remove(ctx.Tests.First(x => x.Name == "ABC"));
+
             ctx.SaveChanges();
         }
     }
