@@ -11,7 +11,7 @@ namespace EFAuditable
 
     class JsonAuditableSerializer : IAuditableSerializer
     {
-        private JsonSerializerOptions GetSerializerOptions() => new JsonSerializerOptions
+        private static JsonSerializerOptions GetSerializerOptions() => new()
         {
             IgnoreReadOnlyFields = true,
             IgnoreReadOnlyProperties = true,

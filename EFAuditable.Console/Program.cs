@@ -1,21 +1,17 @@
 ﻿using EFAuditable.Model;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
+using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Security.Principal;
 
 namespace EFAuditable.Console
 {
-    class Base
-    {
-
-    }
-
-    class Derived : Base
-    {
-
-    }
     internal class Program
     {
         static void Main()
@@ -25,8 +21,9 @@ namespace EFAuditable.Console
                 .Build();
 
             var services = new ServiceCollection();
-            services.AddLogging(static options =>
+            services.AddLogging(options =>
             {
+                options.AddConfiguration(configuration.GetSection("Logging"));
                 options.AddConsole();
             });
             services.AddAuditableTimeProvider();
@@ -45,6 +42,15 @@ namespace EFAuditable.Console
 
             using var scope = serviceProvider.CreateScope();
             using var ctx = scope.ServiceProvider.GetRequiredService<TestDbContext>();
+
+            //IDbContextServices cs = ctx.GetInfrastructure().GetService<IDbContextServices>();
+            //IDbContextDependencies cd = ctx.GetDependencies();
+            //var co = ctx.GetInfrastructure().GetService<IDbContextOptions>();
+            //var oe = co.FindExtension<CoreOptionsExtension>();
+            //var soe = co.FindExtension<SqlServerOptionsExtension>();
+
+            //var m = cs.Model;
+            //var dtm = cs.DesignTimeModel;
 
             Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity("rjperes"), []);
 

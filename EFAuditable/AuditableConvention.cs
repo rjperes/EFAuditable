@@ -5,14 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
 namespace EFAuditable
 {
-    internal class AuditableConvention(AuditableOptions options) : IModelFinalizingConvention, IModelInitializedConvention
+    internal class AuditableConvention(AuditableOptions options) : IModelFinalizingConvention
     {
         public void ProcessModelFinalizing(IConventionModelBuilder modelBuilder, IConventionContext<IConventionModelBuilder> context)
-        {
-            AddToModel(modelBuilder);
-        }
-
-        public void ProcessModelInitialized(IConventionModelBuilder modelBuilder, IConventionContext<IConventionModelBuilder> context)
         {
             AddToModel(modelBuilder);
         }

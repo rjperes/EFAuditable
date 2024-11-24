@@ -11,7 +11,7 @@ namespace EFAuditable
         {
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
             ArgumentNullException.ThrowIfNull(property, nameof(property));
-            
+
             if (!(property.Body is MemberExpression member) || !member.Member.DeclaringType!.IsAssignableFrom(typeof(T)))
             {
                 throw new ArgumentException("Invalid member expression.", nameof(property));

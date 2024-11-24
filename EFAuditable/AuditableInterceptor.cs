@@ -9,8 +9,6 @@ namespace EFAuditable
     {
         private void SetModifiedProperties(EntityEntry entry, DateTimeOffset time, string identity)
         {
-            var entity = entry.Entity;
-
             if (entry.State == EntityState.Added)
             {
                 entry.CurrentValues[nameof(IAuditable.CreatedBy)] = identity;
@@ -22,8 +20,6 @@ namespace EFAuditable
 
         private void SetAddedProperties(EntityEntry entry, DateTimeOffset time, string identity)
         {
-            var entity = entry.Entity;
-
             if (entry.State == EntityState.Modified)
             {
                 entry.CurrentValues[nameof(IAuditable.UpdatedBy)] = identity;
@@ -60,7 +56,7 @@ namespace EFAuditable
                 {
                     var key = entry.Metadata.FindPrimaryKey();
                     var props = key?.Properties?.Where(x => !object.Equals(x.FindAnnotation(AuditableAnnotations.IgnoreProperty)?.Value, true)).ToDictionary(x => x.Name, x => entry.Property(x.Name).OriginalValue);
-                    CopyOldProperties(context, entry, time, identity, props ?? new());
+                    CopyOldProperties(context, entry, time, identity, props ?? []);
                 }
             }
         }
