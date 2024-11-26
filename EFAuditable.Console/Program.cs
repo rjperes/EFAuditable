@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
 using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 using Microsoft.Extensions.Configuration;
@@ -43,14 +44,17 @@ namespace EFAuditable.Console
             using var scope = serviceProvider.CreateScope();
             using var ctx = scope.ServiceProvider.GetRequiredService<TestDbContext>();
 
-            //IDbContextServices cs = ctx.GetInfrastructure().GetService<IDbContextServices>();
-            //IDbContextDependencies cd = ctx.GetDependencies();
+            var cs = ctx.GetInfrastructure().GetService<IDbContextServices>();
+            //var cd = ctx.GetDependencies();
             //var co = ctx.GetInfrastructure().GetService<IDbContextOptions>();
             //var oe = co.FindExtension<CoreOptionsExtension>();
             //var soe = co.FindExtension<SqlServerOptionsExtension>();
-
-            //var m = cs.Model;
+           
+            //var m = (cs.Model as RuntimeModel);
+            //var rm = m.GetRelationalModel();
             //var dtm = cs.DesignTimeModel;
+            //var mm = (dtm as Microsoft.EntityFrameworkCore.Metadata.Internal.Model);
+            //var cds = mm.Builder;
 
             Thread.CurrentPrincipal = new GenericPrincipal(new GenericIdentity("rjperes"), []);
 
