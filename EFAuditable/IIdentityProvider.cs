@@ -29,4 +29,9 @@ namespace EFAuditable
             return Thread.CurrentPrincipal?.Identity?.Name ?? string.Empty;
         }
     }
+
+    public abstract class CustomIdentityProvider : IIdentityProvider
+    {
+        public abstract string GetCurrentUser();
+    }
 }
