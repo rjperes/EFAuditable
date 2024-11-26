@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace EFAuditable
 {
@@ -12,7 +13,7 @@ namespace EFAuditable
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
             ArgumentNullException.ThrowIfNull(property, nameof(property));
 
-            if (!(property.Body is MemberExpression member) || !member.Member.DeclaringType!.IsAssignableFrom(typeof(T)))
+            if (property.Body is not MemberExpression member || !member.Member.DeclaringType!.IsAssignableFrom(typeof(T)))
             {
                 throw new ArgumentException("Invalid member expression.", nameof(property));
             }
@@ -35,7 +36,7 @@ namespace EFAuditable
             return IsAudit(entry.Metadata);
         }
 
-        internal static bool IsAudit(this IReadOnlyEntityType entry)
+        internal static bool IsAudit(this IReadOnlyTypeBase entry)
         {
             ArgumentNullException.ThrowIfNull(entry, nameof(entry));
             var audit = entry.FindAnnotation(AuditableAnnotations.Audit)?.Value;
@@ -47,6 +48,26 @@ namespace EFAuditable
 
             return typeof(IAuditable).IsAssignableFrom(entry.ClrType)
                 || Attribute.IsDefined(entry.ClrType, typeof(AuditableAttribute));
+        }
+
+        internal static bool IsHistory(this EntityEntry entry)
+        {
+            ArgumentNullException.ThrowIfNull(entry, nameof(entry));
+            var history = entry.Metadata.FindAnnotation(AuditableAnnotations.History)?.Value;
+
+            if (history is bool)
+            {
+                return history.Equals(true);
+            }
+
+            history = entry.Metadata.ClrType.GetCustomAttribute<AuditableAttribute>()?.History;
+
+            if (history is bool)
+            {
+                return history.Equals(true);
+            }
+
+            return false;
         }
     }
 }

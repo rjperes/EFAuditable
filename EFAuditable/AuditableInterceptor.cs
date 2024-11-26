@@ -50,13 +50,11 @@ namespace EFAuditable
                 var time = timeProvider.GetUtcNow();
                 var identity = identityProvider.GetCurrentUser();
 
-                var entries = context.ChangeTracker.Entries().Where(x => x.IsAudit()).Where(x => x.State == EntityState.Modified || x.State == EntityState.Deleted).ToList();
+                var entries = context.ChangeTracker.Entries().Where(x => x.IsHistory()).Where(x => x.State == EntityState.Modified || x.State == EntityState.Deleted).ToList();
 
                 foreach (var entry in entries)
                 {
-                    var key = entry.Metadata.FindPrimaryKey();
-                    var props = key?.Properties?.Where(x => !object.Equals(x.FindAnnotation(AuditableAnnotations.IgnoreProperty)?.Value, true)).ToDictionary(x => x.Name, x => entry.Property(x.Name).OriginalValue);
-                    CopyOldProperties(context, entry, time, identity, props ?? []);
+                    CopyOldProperties(context, entry, time, identity);
                 }
             }
         }
@@ -77,16 +75,19 @@ namespace EFAuditable
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        private void CopyOldProperties(DbContext ctx, EntityEntry entry, DateTimeOffset time, string identity, Dictionary<string, object?> key)
+        private void CopyOldProperties(DbContext ctx, EntityEntry entry, DateTimeOffset time, string identity)
         {
             if (options.History)
             {
+                var key = entry.Metadata.FindPrimaryKey();
+                var props = key?.Properties?.Where(x => !object.Equals(x.FindAnnotation(AuditableAnnotations.IgnoreProperty)?.Value, true)).ToDictionary(x => x.Name, x => entry.Property(x.Name).OriginalValue);
+
                 var ignoreProperties = entry.Properties
                     .Where(x => object.Equals(x.Metadata.FindAnnotation(AuditableAnnotations.IgnoreProperty)?.Value, true))
                     .Select(x => x.Metadata.Name)
                     .Concat([nameof(IAuditable.UpdatedAt), nameof(IAuditable.UpdatedBy), nameof(IAuditable.CreatedAt), nameof(IAuditable.CreatedBy)])
                     .ToArray();
-                var keys = serializer.Serialize(key);
+                var keys = key != null ? serializer.Serialize(key) : string.Empty;
                 var values = serializer.Serialize(entry.Entity, ignoreProperties);
 
                 var history = new AuditableHistory

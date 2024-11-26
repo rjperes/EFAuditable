@@ -38,6 +38,6 @@ namespace EFAuditable.Model
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<Test> Tests { get; private set; }
+        public DbSet<Test> Tests { get; private set; } = default!;
     }
 }
