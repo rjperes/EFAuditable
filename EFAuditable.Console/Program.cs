@@ -52,7 +52,7 @@ namespace EFAuditable.Console
 
             test.Name = $"Test Updated at {DateTime.UtcNow}";
 
-            ctx.Add(new Test { Name = "ABC" });
+            ctx.Add(new Test { Name = "ABC", Category = new TestCategory { Name = "FooBar" } });
 
             //ctx.Tests.Remove(ctx.Tests.First(x => x.Name == "ABC"));
 

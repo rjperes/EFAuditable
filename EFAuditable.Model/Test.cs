@@ -5,6 +5,7 @@ namespace EFAuditable.Model
     {
         public int Id { get; set; }
         public required string Name { get; set; }
+        public TestCategory? Category { get; set; }
 
         public string? CreatedBy { get; set; }
 
